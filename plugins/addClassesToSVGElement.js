@@ -60,7 +60,10 @@ export const fn = (root, params, info) => {
     !(Array.isArray(params.classNames) && params.classNames.length !== 0) &&
     !params.className
   ) {
-    console.error(ENOCLS);
+    info.warn({
+      code: 'ADD_CLASSES_TO_SVG_ELEMENT_NO_PARAMS',
+      message: ENOCLS,
+    });
     return null;
   }
   const classNames = params.classNames || [params.className];

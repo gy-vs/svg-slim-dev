@@ -262,7 +262,54 @@ export type Visitor = {
 export type PluginInfo = {
   path?: string;
   multipassCount: number;
+  /**
+   * Report a warning (or a lower severity informational notice) through the
+   * {@link Config#onWarning} callback of the running optimize call. The plugin
+   * name is attached automatically, set `preset` for plugins invoked through a
+   * preset.
+   */
+  warn: PluginWarn;
 };
+
+/**
+ * Severity of a reported {@link Warning}. `info` is lower than `warning` and is
+ * used for notices such as an optimization being deliberately skipped.
+ */
+export type WarningLevel = 'warning' | 'info';
+
+/**
+ * A warning or informational notice reported by SVGO or by a plugin.
+ */
+export type Warning = {
+  /**
+   * Stable short string identifying the kind of notice, suitable for filtering
+   * or for turning specific categories into errors in CI.
+   */
+  code: string;
+  /** Human readable message. */
+  message: string;
+  /**
+   * Name of the plugin that produced the notice. An empty string is used for
+   * notices that are not tied to a specific plugin (for example a null entry
+   * in the plugins list).
+   */
+  plugin: string;
+  /** Name of the preset when the plugin was invoked through one. */
+  preset?: string;
+  level: WarningLevel;
+};
+
+/**
+ * Warning as reported from within a plugin via `info.warn`. The plugin and
+ * preset names are attached automatically by the plugins engine.
+ */
+export type PluginWarning = {
+  code: string;
+  message: string;
+  level?: WarningLevel;
+};
+
+export type PluginWarn = (warning: PluginWarning) => void;
 
 export type Plugin<P = null> = (
   root: XastRoot,
@@ -351,8 +398,23 @@ export type Config = {
   js2svg?: StringifyOptions;
   /** Output as Data URI string. */
   datauri?: DataUri;
+  /**
+   * Called once for every warning or informational notice emitted while
+   * optimizing the SVG, for example unknown plugins in the config or a plugin
+   * deliberately skipping an optimization.
+   *
+   * When this callback is provided the warnings are not printed to the console
+   * anymore. The same objects are also available in the `warnings` property of
+   * the optimize result.
+   */
+  onWarning?: (warning: Warning) => void;
 };
 
 export type Output = {
   data: string;
+  /**
+   * Warnings and informational notices emitted while optimizing, de-duplicated
+   * across multipass runs.
+   */
+  warnings: Warning[];
 };

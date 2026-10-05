@@ -129,7 +129,7 @@ const getIdString = (arr) => {
  *
  * @type {import('../lib/types.js').Plugin<CleanupIdsParams>}
  */
-export const fn = (_root, params) => {
+export const fn = (_root, params, info) => {
   const {
     remove = true,
     minify = true,
@@ -150,17 +150,23 @@ export const fn = (_root, params) => {
   /** @type {Map<string, {element: import('../lib/types.js').XastElement, name: string }[]>} */
   const referencesById = new Map();
   let deoptimized = false;
+  let deoptimizeReason = '';
 
   return {
     element: {
       enter: (node) => {
         if (!force) {
           // deoptimize if style or scripts are present
-          if (
-            (node.name === 'style' && node.children.length !== 0) ||
-            hasScripts(node)
-          ) {
+          if (node.name === 'style' && node.children.length !== 0) {
             deoptimized = true;
+            deoptimizeReason =
+              'the document contains a <style> element, so IDs could be referenced from CSS';
+            return;
+          }
+          if (hasScripts(node)) {
+            deoptimized = true;
+            deoptimizeReason =
+              'the document contains a <script> element, so IDs could be referenced from JavaScript';
             return;
           }
 
@@ -206,6 +212,11 @@ export const fn = (_root, params) => {
     root: {
       exit: () => {
         if (deoptimized) {
+          info.warn({
+            code: 'CLEANUP_IDS_SKIPPED',
+            level: 'info',
+            message: `cleanupIds: IDs were not modified because ${deoptimizeReason}. Set the "force" parameter to override.`,
+          });
           return;
         }
         /**
