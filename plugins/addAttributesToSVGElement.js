@@ -53,9 +53,13 @@ plugins: [
  *
  * @type {import('../lib/types.js').Plugin<AddAttributesToSVGElementParams>}
  */
-export const fn = (root, params) => {
+export const fn = (root, params, info) => {
   if (!Array.isArray(params.attributes) && !params.attribute) {
-    console.error(ENOCLS);
+    info.warn({
+      code: 'missing-params',
+      message: ENOCLS,
+      level: 'error',
+    });
     return null;
   }
   const attributes = params.attributes || [params.attribute];

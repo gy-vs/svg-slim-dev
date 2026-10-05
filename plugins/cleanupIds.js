@@ -129,7 +129,7 @@ const getIdString = (arr) => {
  *
  * @type {import('../lib/types.js').Plugin<CleanupIdsParams>}
  */
-export const fn = (_root, params) => {
+export const fn = (_root, params, info) => {
   const {
     remove = true,
     minify = true,
@@ -206,6 +206,12 @@ export const fn = (_root, params) => {
     root: {
       exit: () => {
         if (deoptimized) {
+          info.warn({
+            code: 'cleanup-ids-deoptimized',
+            level: 'info',
+            message:
+              'The document contains styles or scripts, so cleanupIds skipped removing and minifying IDs.',
+          });
           return;
         }
         /**

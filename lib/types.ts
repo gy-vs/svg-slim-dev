@@ -259,9 +259,52 @@ export type Visitor = {
   root?: VisitorRoot;
 };
 
+export type WarningLevel = 'error' | 'warn' | 'info';
+
+/**
+ * A structured warning reported while optimizing. Received through
+ * {@link Config#onWarning} and collected in {@link Output#warnings}.
+ */
+export type OptimizationWarning = {
+  /** Stable machine-readable code, suitable for filtering by category. */
+  code: string;
+  /** Human-readable description of the warning. */
+  message: string;
+  /** Severity of the warning, `'info'` is lower than `'warn'`. */
+  level: WarningLevel;
+  /** Name of the plugin that produced the warning, if applicable. */
+  plugin?: string;
+  /** Name of the preset if the plugin was invoked as part of a preset. */
+  preset?: string;
+};
+
+/**
+ * The warning reported by a plugin through {@link PluginInfo#warn}. The
+ * `plugin` and `preset` fields are filled in automatically by SVGO, and
+ * `level` defaults to `'warn'`.
+ */
+export type PluginWarning = {
+  /** Stable machine-readable code, suitable for filtering by category. */
+  code: string;
+  /** Human-readable description of the warning. */
+  message: string;
+  /** Severity of the warning, defaults to `'warn'`. */
+  level?: WarningLevel;
+  /** Name of the plugin that produced the warning, if applicable. */
+  plugin?: string;
+  /** Name of the preset if the plugin was invoked as part of a preset. */
+  preset?: string;
+};
+
 export type PluginInfo = {
   path?: string;
   multipassCount: number;
+  /**
+   * Report a warning through the same channel used by builtin plugins. The
+   * warning is forwarded to {@link Config#onWarning} and collected in
+   * {@link Output#warnings}.
+   */
+  warn: (warning: PluginWarning) => void;
 };
 
 export type Plugin<P = null> = (
@@ -351,8 +394,18 @@ export type Config = {
   js2svg?: StringifyOptions;
   /** Output as Data URI string. */
   datauri?: DataUri;
+  /**
+   * Called once for each distinct warning produced while optimizing. When
+   * specified, warnings are no longer printed to the console.
+   */
+  onWarning?: (warning: OptimizationWarning) => void;
 };
 
 export type Output = {
   data: string;
+  /**
+   * Warnings produced while optimizing. Duplicates across multipass
+   * iterations are only included once.
+   */
+  warnings: OptimizationWarning[];
 };

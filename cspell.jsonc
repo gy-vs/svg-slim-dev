@@ -6,6 +6,7 @@
     "deoptimizations",
     "deoptimize",
     "deoptimized",
+    "deoptimizes",
     "Fontello",
     "inlines",
     // Abbreviations
@@ -60,6 +61,7 @@
     "ENOCLS|ENOATTRS",
     "import .+", // Import statements in Javascript
     "onwarn", // Rollup API,
+    "OptimizationWarning", // cspell splits this as Optimizati + on + Warning
     "QRAB|QRCD",
     "rrggbb",
     "sax\\..+", // Any properties of the sax API

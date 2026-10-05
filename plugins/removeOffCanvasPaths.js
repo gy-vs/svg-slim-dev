@@ -14,7 +14,7 @@ export const description =
  *
  * @type {import('../lib/types.js').Plugin}
  */
-export const fn = () => {
+export const fn = (_root, _params, info) => {
   /**
    * @type {?{
    *   top: number,
@@ -119,7 +119,7 @@ export const fn = () => {
             { command: 'z', args: [] },
           ];
 
-          if (intersects(viewBoxPathData, pathData) === false) {
+          if (intersects(viewBoxPathData, pathData, info.warn) === false) {
             detachNodeFromParent(node, parentNode);
           }
         }

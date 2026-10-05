@@ -88,9 +88,12 @@ plugins: [
  *
  * @type {import('../lib/types.js').Plugin<RemoveAttrsParams>}
  */
-export const fn = (root, params) => {
+export const fn = (root, params, info) => {
   if (typeof params.attrs == 'undefined') {
-    console.warn(ENOATTRS);
+    info.warn({
+      code: 'missing-params',
+      message: ENOATTRS,
+    });
     return null;
   }
 

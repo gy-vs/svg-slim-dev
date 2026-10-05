@@ -60,7 +60,11 @@ export const fn = (root, params, info) => {
     !(Array.isArray(params.classNames) && params.classNames.length !== 0) &&
     !params.className
   ) {
-    console.error(ENOCLS);
+    info.warn({
+      code: 'missing-params',
+      message: ENOCLS,
+      level: 'error',
+    });
     return null;
   }
   const classNames = params.classNames || [params.className];

@@ -236,9 +236,10 @@ function set(dest, source) {
  *
  * @param {ReadonlyArray<import('../lib/types.js').PathDataItem>} path1
  * @param {ReadonlyArray<import('../lib/types.js').PathDataItem>} path2
+ * @param {import('../lib/types.js').PluginInfo['warn']=} warn
  * @returns {boolean}
  */
-export const intersects = function (path1, path2) {
+export const intersects = function (path1, path2, warn) {
   // Collect points of every subpath.
   const points1 = gatherPoints(convertRelativeToAbsolute(path1));
   const points2 = gatherPoints(convertRelativeToAbsolute(path2));
@@ -285,9 +286,11 @@ export const intersects = function (path1, path2) {
 
       while (true) {
         if (iterations-- == 0) {
-          console.error(
-            'Error: infinite loop while processing mergePaths plugin.',
-          );
+          warn?.({
+            code: 'infinite-loop',
+            message: 'Error: infinite loop while processing mergePaths plugin.',
+            level: 'error',
+          });
           return true; // true is the safe value that means “do nothing with paths”
         }
         // add a new point

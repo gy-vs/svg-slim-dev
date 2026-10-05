@@ -34,7 +34,7 @@ function elementHasUrl(computedStyle, attName) {
  *
  * @type {import('../lib/types.js').Plugin<MergePathsParams>}
  */
-export const fn = (root, params) => {
+export const fn = (root, params, info) => {
   const {
     force = false,
     floatPrecision = 3,
@@ -142,7 +142,7 @@ export const fn = (root, params) => {
           const currentPathData = path2js(child);
           prevPathData = prevPathData ?? path2js(prevChild);
 
-          if (force || !intersects(prevPathData, currentPathData)) {
+          if (force || !intersects(prevPathData, currentPathData, info.warn)) {
             prevPathData.push(...currentPathData);
             elementsToRemove.push(child);
             continue;
